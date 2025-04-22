@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Countries - Sockwell Stats</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .country-entry {
+      padding: 10px 0;
+      border-bottom: 1px solid #ccc;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .country-entry img.flag {
+      height: 18px;
+      width: 24px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
+
+    .ranking-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #004080;
+      margin-bottom: 15px;
+    }
+
+    .country-rank {
+      font-weight: bold;
+      color: #004080;
+      margin-right: 4px;
+    }
+
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    #logo-img {
+      height: 80px;
+      width: auto;
+      display: block;
+    }
+
+    #logo-home {
+      display: inline-block;
+    }
+
+    #nav-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-button {
+      background-color: #004080;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background-color: #003060;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="top-bar">
+      <a href="/" id="logo-home">
+        <img src="{{ url_for('static', filename='sockwell_logo.png') }}" alt="Sockwell Stats" id="logo-img">
+      </a>
+      <div id="nav-links">
+        <a href="/rankings" class="nav-button">Swim Rankings</a>
+        <a href="/countries" class="nav-button">Top Countries</a>
+        <a href="/top-swims" class="nav-button">Top Swims</a>
+      </div>      
+    </div>
+
+    <h1 class="ranking-title">Country Rankings</h1>
+    <div id="countries-list">Loading country stats...</div>
+
+    <script>
+      fetch('/countries-data')
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('countries-list');
+          container.innerHTML = "";
+
+          data.forEach(entry => {
+            const code = (entry.country_code || '').toLowerCase();
+            const flagURL = `https://flagcdn.com/24x18/${code}.png`;
+
+            const div = document.createElement('div');
+            div.className = 'country-entry';
+            div.innerHTML = `
+              <img src="${flagURL}" alt="${code} flag" class="flag">
+              <span class="country-rank">#${entry.rank}</span>
+              ${entry.country_name} — Avg Rank: ${entry.average_ranking}
+            `;
+            container.appendChild(div);
+          });
+        })
+        .catch(error => {
+          console.error("Error loading country data:", error);
+          document.getElementById('countries-list').textContent = "Failed to load country rankings.";
+        });
+    </script>
+  </div>
+</body>
+</html>

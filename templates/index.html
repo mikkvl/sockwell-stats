@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Swimmer Profiles</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div id="top-bar">
+      <a href="/" id="logo"><img id="logo-img" src="{{ url_for('static', filename='sockwell_logo.png') }}" alt="Sockwell Stats Logo"></a>
+      <div id="nav-links">
+        <a href="/rankings" class="nav-button">Swim Rankings</a>
+        <a href="/countries" class="nav-button">Top Countries</a>
+        <a href="/top-swims" class="nav-button">Top Swims</a>
+      </div>
+    </div>
+
+    <h1 class="ranking-title">Swimmer Profiles</h1>
+
+    <div id="search-container">
+      <input type="text" id="search-box" placeholder="Search for a swimmer by name...">
+      <div id="search-results"></div>
+    </div>
+
+    <!-- Swimmer profiles list -->
+    <div id="swimmer-list">
+      {% for swimmer in swimmers %}
+      <div class="swimmer" id="swimmer-{{ swimmer.first_name }}-{{ swimmer.last_name }}">
+        <p><strong>{{ swimmer.first_name }} {{ swimmer.last_name }}</strong> ({{ swimmer.country }})</p>
+        <table class="event-table">
+          <thead>
+            <tr><th>Event</th><th>Time</th></tr>
+          </thead>
+          <tbody>
+            {% for event in swimmer.events %}
+            <tr>
+              <td>{{ event.distance }} {{ event.stroke_name }}</td>
+              <td>{{ event.best_time }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Search logic -->
+  <script>
+    let swimmers = [];
+
+    fetch("/swimmers")
+      .then(res => res.json())
+      .then(data => {
+        swimmers = data;
+      });
+
+    const searchBox = document.getElementById("search-box");
+    const results = document.getElementById("search-results");
+
+    searchBox.addEventListener("input", () => {
+      const value = searchBox.value.toLowerCase();
+      results.innerHTML = "";
+
+      if (!value) return;
+
+      const filtered = swimmers.filter(swimmer =>
+        swimmer.first_name.toLowerCase().includes(value) ||
+        swimmer.last_name.toLowerCase().includes(value)
+      );
+
+      filtered.forEach(swimmer => {
+        const flag = swimmer.country_code
+          ? `https://flagcdn.com/24x18/${swimmer.country_code}.png`
+          : "";
+
+        const rank = swimmer.ranking !== "—" ? `#${swimmer.ranking}` : "#—";
+
+        const div = document.createElement("div");
+        div.classList.add("search-item");
+
+        div.innerHTML = `
+          <img src="${flag}" class="country" style="width: 20px; margin-right: 8px;" />
+          <strong>${rank}</strong> - ${swimmer.first_name} ${swimmer.last_name}
+        `;
+
+        div.addEventListener("click", () => {
+          searchBox.value = `${swimmer.first_name} ${swimmer.last_name}`;
+          results.innerHTML = "";
+          document.querySelector(`#swimmer-${swimmer.first_name}-${swimmer.last_name}`)?.scrollIntoView({ behavior: "smooth" });
+        });
+
+        results.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>

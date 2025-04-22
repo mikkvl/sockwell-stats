@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Top Swims - Sockwell Stats</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .event-section {
+      margin-bottom: 30px;
+    }
+
+    .event-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #004080;
+      margin-bottom: 10px;
+    }
+
+    .swim-entry {
+      font-size: 14px;
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .swim-entry span.rank {
+      font-weight: 600;
+      color: #004080;
+      width: 30px;
+    }
+
+    .swim-entry .country {
+      flex-shrink: 0;
+      width: 24px;
+    }
+
+    .swim-entry .name {
+      flex-grow: 1;
+    }
+
+    .swim-entry .time {
+      font-weight: 500;
+      color: #222;
+      width: 60px;
+      text-align: right;
+    }
+
+    #event-select {
+      margin-bottom: 20px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Bar -->
+    <div id="top-bar">
+      <a href="/" id="logo-home">
+        <img src="{{ url_for('static', filename='sockwell_logo.png') }}" alt="Sockwell Stats" id="logo-img">
+      </a>
+      <div id="nav-links">
+        <a href="/rankings" class="nav-button">Swim Rankings</a>
+        <a href="/countries" class="nav-button">Top Countries</a>
+        <a href="/top-swims" class="nav-button">Top Swims</a>
+      </div>
+    </div>
+
+    <h1 class="ranking-title">Top Swims</h1>
+
+    <select id="event-select">
+      <option value="" disabled selected>Select an event...</option>
+    </select>
+
+    <div id="top-swims-container">Loading top swims...</div>
+
+    <script>
+      let allSwims = {};
+      let currentEvent = "50 Freestyle";
+
+      fetch('/top-swims-data')
+        .then(res => res.json())
+        .then(data => {
+          // Group data by event
+          allSwims = data.reduce((grouped, swim) => {
+            if (!grouped[swim.event_name]) grouped[swim.event_name] = [];
+            grouped[swim.event_name].push(swim);
+            return grouped;
+          }, {});
+
+          // Populate event dropdown
+          const eventSelect = document.getElementById('event-select');
+          const sortedEvents = Object.keys(allSwims).sort();
+          sortedEvents.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event;
+            option.textContent = event;
+            if (event === "50 Freestyle") option.selected = true;
+            eventSelect.appendChild(option);
+          });
+
+          eventSelect.addEventListener('change', (e) => {
+            currentEvent = e.target.value;
+            renderSwims(currentEvent);
+          });
+
+          // Render default event
+          renderSwims(currentEvent);
+        });
+
+      function renderSwims(event) {
+        const container = document.getElementById('top-swims-container');
+        container.innerHTML = '';
+
+        const section = document.createElement('div');
+        section.className = 'event-section';
+
+        const title = document.createElement('div');
+        title.className = 'event-title';
+        title.textContent = event;
+        section.appendChild(title);
+
+        const swimmers = allSwims[event] || [];
+        swimmers.forEach(swimmer => {
+          const row = document.createElement('div');
+          row.className = 'swim-entry';
+
+          const flagCode = getFlagCode(swimmer.country_name);
+          const flag = `<img class="country" src="https://flagcdn.com/24x18/${flagCode}.png" alt="${flagCode}">`;
+
+          row.innerHTML = `
+            <span class="rank">#${swimmer.rank}</span>
+            ${flag}
+            <span class="name">${swimmer.first_name} ${swimmer.last_name}</span>
+            <span class="time">${formatTime(swimmer.best_time)}</span>
+          `;
+
+          section.appendChild(row);
+        });
+
+        container.appendChild(section);
+      }
+
+      function formatTime(time) {
+        const t = parseFloat(time);
+        return t >= 60
+          ? `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`
+          : t.toFixed(2);
+      }
+
+      function getFlagCode(countryName) {
+        const map = {
+          "Argentina": "ar", "Australia": "au", "Austria": "at", "Belgium": "be",
+          "Brazil": "br", "Canada": "ca", "Chile": "cl", "China": "cn", "Colombia": "co",
+          "Czech Republic": "cz", "Denmark": "dk", "Egypt": "eg", "Finland": "fi",
+          "France": "fr", "Germany": "de", "Great Britain": "gb", "Greece": "gr",
+          "Hungary": "hu", "India": "in", "Indonesia": "id", "Ireland": "ie",
+          "Israel": "il", "Italy": "it", "Japan": "jp", "Kazakhstan": "kz", "Kenya": "ke",
+          "Malaysia": "my", "Mexico": "mx", "Netherlands": "nl", "New Zealand": "nz",
+          "Nigeria": "ng", "Norway": "no", "Peru": "pe", "Philippines": "ph",
+          "Poland": "pl", "Portugal": "pt", "Russia": "ru", "Singapore": "sg", "Slovakia": "sk",
+          "South Africa": "za", "South Korea": "kr", "Spain": "es", "Sweden": "se",
+          "Switzerland": "ch", "Thailand": "th", "Tunisia": "tn", "Turkey": "tr",
+          "Ukraine": "ua", "United Kingdom": "gb", "United States": "us", "Venezuela": "ve"
+        };
+        return map[countryName] || "un";
+      }
+    </script>
+  </div>
+</body>
+</html>

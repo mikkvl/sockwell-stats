@@ -1,0 +1,51 @@
+country_id,country_name,country_code
+1,United States,US
+2,Australia,AU
+3,China,CN
+4,Russia,RU
+5,Japan,JP
+6,Germany,DE
+7,France,FR
+8,United Kingdom,GB
+9,Canada,CA
+10,Italy,IT
+11,Brazil,BR
+12,Hungary,HU
+13,South Korea,KR
+14,Netherlands,NL
+15,South Africa,ZA
+16,Sweden,SE
+17,New Zealand,NZ
+18,Spain,ES
+19,Poland,PL
+20,Ukraine,UA
+21,Denmark,DK
+22,Argentina,AR
+23,Mexico,MX
+24,Singapore,SG
+25,Norway,NO
+26,Turkey,TR
+27,Finland,FI
+28,India,IN
+29,Indonesia,ID
+30,Malaysia,MY
+31,Thailand,TH
+32,Philippines,PH
+33,Belgium,BE
+34,Switzerland,CH
+35,Austria,AT
+36,Portugal,PT
+37,Czech Republic,CZ
+38,Slovakia,SK
+39,Greece,GR
+40,Ireland,IE
+41,Israel,IL
+42,Egypt,EG
+43,Tunisia,TN
+44,Kazakhstan,KZ
+45,Colombia,CO
+46,Venezuela,VE
+47,Peru,PE
+48,Chile,CL
+49,Nigeria,NG
+50,Kenya,KE

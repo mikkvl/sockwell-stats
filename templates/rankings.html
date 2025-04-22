@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rankings - Sockwell Stats</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .ranking-entry {
+      padding: 10px 0;
+      border-bottom: 1px solid #ccc;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ranking-entry img.flag {
+      height: 18px;
+      width: 24px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
+
+    .ranking-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #004080;
+      margin-bottom: 15px;
+    }
+
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    #logo-img {
+      height: 80px;
+      width: auto;
+      display: block;
+    }
+
+    #logo-home {
+      display: inline-block;
+    }
+
+    #nav-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-button {
+      background-color: #004080;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+
+    .nav-button:hover {
+      background-color: #003060;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="top-bar">
+      <a href="/" id="logo-home">
+        <img src="{{ url_for('static', filename='sockwell_logo.png') }}" alt="Sockwell Stats" id="logo-img">
+      </a>
+      <div id="nav-links">
+        <a href="/rankings" class="nav-button">Swim Rankings</a>
+        <a href="/countries" class="nav-button">Top Countries</a>
+        <a href="/top-swims" class="nav-button">Top Swims</a>
+      </div>      
+    </div>
+
+    <h1 class="ranking-title">Top Ranked Swimmers</h1>
+    <div id="rankings-list">Loading rankings...</div>
+
+    <script>
+      fetch('/rankings-data')
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('rankings-list');
+          container.innerHTML = "";
+
+          data.forEach(entry => {
+            const code = (entry.country_code || '').toLowerCase();
+            const flagURL = `https://flagcdn.com/24x18/${code}.png`;
+
+            const div = document.createElement('div');
+            div.className = 'ranking-entry';
+            div.innerHTML = `
+              <img src="${flagURL}" alt="${code} flag" class="flag">
+              #${entry.ranking} - ${entry.first_name} ${entry.last_name}
+            `;
+            container.appendChild(div);
+          });
+        })
+        .catch(error => {
+          console.error("Error loading rankings:", error);
+          document.getElementById('rankings-list').textContent = "Failed to load rankings.";
+        });
+    </script>
+  </div>
+</body>
+</html>
